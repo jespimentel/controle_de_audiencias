@@ -1,35 +1,9 @@
 import xlrd, xlwt, re
 from striprtf.striprtf import rtf_to_text
+from util import indica_promotor, seleciona_arquivo
 
-relatorio_rtf = "Fevereiro (Pauta Analítica).rtf"
-relatorio_xls = "Fevereiro (Pauta sintética - Com número de controle).xls"
-
-def indica_promotor(n_controle):
-    """ Retorna o nome do PJ responsável pelo caso, de acordo com o número de controle do processo. """
-    # Regra de distribuição:
-    # 4º PROMOTOR DE JUSTIÇA:Feitos de finais 17, 19, 21, 23, 25, 27 e 29 da 4ª Vara Criminal;
-    # 6º PROMOTOR DE JUSTIÇA:feitos de finais 31, 33, 35, 37, 39, 41 e 43 da 4ª Vara Criminal;
-    # 7º PROMOTOR DE JUSTIÇA:feitos de finais 45, 47, 49, 51, 53, 55 e 57, da 4ª Vara Criminal;
-    # 9° PROMOTOR DE JUSTIÇA:feitos de finais 59, 61, 63, 65, 67, 69 e 71 da 4ª Vara Criminal;
-    # 10° PROMOTOR DE JUSTIÇA:feitos de finais 73, 75, 77, 79, 81, 83 e 85 da 4ª Vara Criminal;
-    # 11° PROMOTOR DE JUSTIÇA:feitos de finais 87, 89, 91, 93, 95, 97 e 99 da 4ª Vara Criminal;
-    # 17° PROMOTOR DE JUSTIÇA:feitos de finais pares e finais 01, 03, 05, 07, 09, 11, 13 e 15 da 4ª Vara Criminal.
-    
-    atribuicoes = {
-        "pj04": [17, 19, 21, 23, 25, 27, 29], 
-        "pj06": [31, 33, 35, 37, 39, 41, 43], 
-        "pj07": [45, 47, 49, 51, 53, 55, 57], 
-        "pj09": [59, 61, 63, 65, 67, 69, 71], 
-        "pj10":[73, 75, 77, 79, 81, 83, 85], 
-        "pj11":[87, 89, 91, 93, 95, 97, 99]
-        } # O pj17 se relaciona a todos os demais finais.
-   
-    final = int(n_controle[-2:]) # 2 últimos caracteres da string informada
-   
-    for chave in atribuicoes:
-        if final in atribuicoes[chave]:
-            return chave
-    return "pj17"
+relatorio_rtf = seleciona_arquivo('Selecione a Pauta Analítica (arquivo rtf)')
+relatorio_xls = seleciona_arquivo('Selecione a Pauta Sintética (arquivo xls)')
 
 # Leitura do arquivo texto rtf
 
@@ -79,9 +53,11 @@ for audiencia in lista_audiencias:
   processo = re.search(padrao_processo, audiencia)
   try:
     data_audiencia = data_hora.group()
+    data = data_audiencia.split()[0]
+    horario = data_audiencia.split()[1]
     n_controle = processo_controle[processo.group()][0]
     promotor = processo_controle[processo.group()][1]
-    pauta_audiencias[processo.group()] = [data_audiencia, n_controle, audiencia, promotor]
+    pauta_audiencias[processo.group()] = [data, horario, n_controle, audiencia, promotor]
   except:
     pass
 
@@ -93,7 +69,7 @@ for aud in pauta_audiencias.values():
 
 workbook = xlwt.Workbook()
 sheet = workbook.add_sheet("Audiências")
-cabecalho = ["Data_hora", "N_controle", "Informacoes", "Promotor"]
+cabecalho = ["Data", "horario", "N_controle", "Informacoes", "Promotor"]
 
 for col, value in enumerate(cabecalho):
     sheet.write(0, col, value)
@@ -103,3 +79,5 @@ for row, row_data in enumerate(audiencias, start=1):
         sheet.write(row, col, value)
 
 workbook.save("audiencias.xls")  
+
+print('Programa concluído!')
