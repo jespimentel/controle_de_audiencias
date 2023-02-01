@@ -37,7 +37,7 @@ def indica_promotor(n_controle):
 
 #     atribuicoes = {
 #         "pj06": [1, 2, 3, 9, 0], 
-#         } # O pj17 se relaciona a todos os demais finais.
+#         } # O pj11 se relaciona a todos os demais finais.
 
 #     final = int(n_controle[-1:]) # último caracter do número de controle informado
 
